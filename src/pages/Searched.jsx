@@ -1,35 +1,33 @@
-import React from 'react'
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
 
 function Searched() {
+  const [searchedRecipes, setSearchedRecipes] = useState([]);
+  let params = useParams();
 
-    const [searchedRecipes, setSearchedRecipes] = useState([]);
-    let params = useParams();
-    const getSearched = async (name) => {
-        const data = await fetch(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${process.env.REACT_APP_API_KEY}&query=${name}`);
+  const getSearched = async (name) => {
+    const data = await fetch(
+      `https://api.spoonacular.com/recipes/complexSearch?apiKey=${process.env.REACT_APP_API_KEY}&query=${name}`
+    );
+    const recipes = await data.json();
+    setSearchedRecipes(recipes.results);
+  };
 
-        const recipes = await data.json();
-        setSearchedRecipes(recipes.results);
-    };
+  useEffect(() => {
+    getSearched(params.search);
+  }, [params.search]);
 
-    useEffect(() =>  {
-        getSearched(params.search);
-        console.log(params.type);
-
-    },[params.search]);
   return (
     <Grid>
       {searchedRecipes.map((item) => {
-        return(
-            <Card key={item.id}>
-                <Link to={'/recipe/' + item.id}>
-                <img src={item.image} alt="" />
-                <h4>{item.title}</h4>
-                </Link>
-            </Card>
+        return (
+          <Card key={item.id}>
+            <Link to={'/recipe/' + item.id}>
+              <img src={item.image} alt={item.title} />
+              <h4>{item.title}</h4>
+            </Link>
+          </Card>
         );
       })}
     </Grid>
@@ -37,24 +35,49 @@ function Searched() {
 }
 
 const Grid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-    grid-gap: 3rem;
+  display: grid;
+  grid-gap: 2rem;
 
+ 
+  grid-template-columns: repeat(2, 1fr);
+
+ 
+  @media (min-width: 600px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
 `;
 
 const Card = styled.div`
-    img{
-        width: 100%;
-        border-radius: 2rem;
-    }
-    a {
-        text-decoration: none;
-    }
-    h4{
-        text-align: center;
-        padding: 1rem;
-    }
-`
+  img {
+    width: 100%;
+    border-radius: 1.5rem;
+    object-fit: cover;
+  }
 
-export default Searched
+  a {
+    text-decoration: none;
+  }
+
+  h4 {
+    text-align: center;
+    padding: 0.8rem 0;
+    font-size: 1rem;
+    line-height: 1.2;
+    color: #333;
+  }
+
+  @media (max-width: 599px) {
+    h4 {
+      font-size: 0.85rem;
+      line-height: 1.1;
+      padding: 0.5rem 0;
+    }
+  }
+`;
+
+export default Searched;

@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Splide, SplideSlide } from '@splidejs/react-splide';
-import "@splidejs/splide/dist/css/splide.min.css";
 import { Link } from "react-router-dom";
 
 function Veggie() {
@@ -12,58 +10,38 @@ function Veggie() {
   }, []);
 
   const getVeggie = async () => {
-    console.log("heej");
     const check = localStorage.getItem("veggie");
 
     if (check && check !== 'undefined') {
-      // If the localStorage value exists and is not undefined
       setVeggie(JSON.parse(check));
-      console.log("Loaded from localStorage:", JSON.parse(check));
     } else {
-      // If no valid data in localStorage, fetch from the API
       const api = await fetch(
-        `https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_API_KEY}&number=9&tags=vegetarian
-        `
-       // https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_API_KEY}&number=9&tags=italian,dessert
-
+        `https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_API_KEY}&number=9&tags=vegetarian`
       );
       const data = await api.json();
-
       localStorage.setItem("veggie", JSON.stringify(data.recipes));
       setVeggie(data.recipes);
-      console.log("Fetched from API:", data.recipes);
     }
   };
 
+
+  const displayedRecipes = veggie.slice(0, 4);
+
   return (
-    <div>
-      <Wrapper>
-        <h3>Vegetarian Picks</h3>
-        <Splide
-          options={{
-            perPage: 3,
-            arrows: false,
-            pagination: false,
-            drag: 'free',
-            gap: '5rem',
-          }}
-        >
-          {veggie.map((recipe) => {
-            return (
-              <SplideSlide key={recipe.id}>
-                <Card>
-                <Link to={"/recipe/" + recipe.id}>
-                  <p>{recipe.title}</p>
-                  <img src={recipe.image} alt={recipe.title} />
-                  <Gradient />
-                  </Link>
-                </Card>
-              </SplideSlide>
-            );
-          })}
-        </Splide>
-      </Wrapper>
-    </div>
+    <Wrapper>
+      <h3>Vegetarian Picks</h3>
+      <Grid>
+        {displayedRecipes.map(recipe => (
+          <Card key={recipe.id}>
+            <Link to={"/recipe/" + recipe.id}>
+              <img src={recipe.image} alt={recipe.title} />
+              <p>{recipe.title}</p>
+              <Gradient />
+            </Link>
+          </Card>
+        ))}
+      </Grid>
+    </Wrapper>
   );
 }
 
@@ -71,44 +49,63 @@ const Wrapper = styled.div`
   margin: 4rem 0;
 `;
 
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 1rem;
+
+  @media(min-width: 768px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+`;
+
 const Card = styled.div`
-  min-height: 25rem;
-  border-radius: 2rem;
-  overflow: hidden;
   position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  padding-top: 100%;
 
   img {
-    border-radius: 2rem;
     position: absolute;
-    left: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 1rem;
   }
 
   p {
     position: absolute;
-    z-index: 10;
-    left: 50%;
-    bottom: 0%;
-    transform: translate(-50%, 0%); /* Fixed 'tranform' to 'transform' */
-    color: white;
+    bottom: 0;
     width: 100%;
-    text-align: center;
+    padding: 0.5rem;
+    margin: 0;
+    color: white;
     font-weight: 600;
-    height: 40%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    text-align: center;
+    background: rgba(0,0,0,0.4);
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+    z-index: 10;
   }
+
+  p {
+  
+  font-size: 1rem;
+
+  @media (max-width: 480px) {
+    font-size: 0.6rem; 
+  }
+}
+
 `;
 
 const Gradient = styled.div`
-  z-index: 3;
-  position: absolute; /* Fixed 'positon' to 'position' */
+  position: absolute;
   width: 100%;
   height: 100%;
-  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5));
+  background: linear-gradient(transparent, rgba(0,0,0,0.5));
+  z-index: 5;
 `;
 
 export default Veggie;
